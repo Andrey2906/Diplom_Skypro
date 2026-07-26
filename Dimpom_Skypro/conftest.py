@@ -7,6 +7,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from config.ui_config import BASE_URL, TOKEN1, TOKEN2
 from config.api_config import HEADERS
+from pages.CartPage import CartPage
+from pages.BookmarkPage import BookmarkPage
 
 
 @pytest.fixture
@@ -58,3 +60,24 @@ def session():
 
     yield s
     s.close()
+
+
+@pytest.fixture
+def cleanup_profile(driver):
+    """Фикстура для полной очистки данных пользователя после теста."""
+    yield
+    # Блок после yield — ТЕАРДАУН (выполняется всегда, даже если тест упал!)
+    print("\n[Teardown] Запуск полной очистки профиля...")
+    # 1. Очищаем корзину
+    try:
+        cart_page = CartPage(driver)
+        cart_page.clear_cart()
+    except Exception as e:
+        print(f"[Teardown Warning] Не удалось очистить корзину: {e}")
+    # 2. Очищаем список книг / закладки
+    try:
+        # Передаем драйвер в класс, где объявлен clear_my_books
+        books_page = BookmarkPage(driver)
+        books_page.clear_my_books()
+    except Exception as e:
+        print(f"[Teardown Warning] Не удалось очистить список книг: {e}")
