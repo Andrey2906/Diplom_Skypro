@@ -35,25 +35,3 @@ class CartPage:
 
         books_cart = self.driver.find_elements(*self.BOOKS_NAME)
         return [book.text for book in books_cart]
-
-    def clear_cart(self) -> None:
-        """
-        Этот метод производит очистку корзины от занесенных книг.
-        Защита от popup вшита в метод.
-        """
-        # Закрытие popup если появился
-        self.popup.close_popup()
-
-        # 1. Чистим корзину
-        cart_cleaner = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(
-                self.CLEAR_BUTTON
-                )
-            )
-
-        cart_cleaner.click()
-
-        # 2. Ждем завершения очиски
-        WebDriverWait(self.driver, 10).until(
-            EC.text_to_be_present_in_element(
-                self.CLEAR_TITLE, "Корзина очищена"))

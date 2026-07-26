@@ -13,11 +13,15 @@ from pages.BookmarkPage import BookmarkPage
 @pytest.mark.ui
 @allure.title("Поиск книги по названию")
 @allure.story("Поиск книги")
-def test_search_by_name(driver):
+def test_search_by_name(search_page):
+    # 1. Выполняем поиск
+    search_page.search_book("Грозовый перевал")
 
-    main_page = MainPage(driver)
-    with allure.step("Ввести название книги в поиск"):
-        main_page.search_book("Грозовой перевал")
+    # 2. Получаем список найденных карточек
+    results = search_page.get_search_results()
+    # 3. Проверяем, что вернулось хотя бы одно совпадение
+    assert len(results) > 0, "Результаты поиска пусты, хотя "
+    "ожидалось совпадение"
 
 
 # 2) Открытие карточки книги
@@ -108,8 +112,8 @@ def test_bookmark_books(driver):
         main_page.my_books()
 
     with allure.step("Проверить счетчик закладок"):
-        bookmark_page.update_counter()
-        assert bookmark_page.update_counter() == "2" or "3"
+        current_counter = bookmark_page.update_counter()
+        assert current_counter in ("2", "3")
 
     with allure.step("Очистить список закладок"):
         bookmark_page.clear_my_books()
