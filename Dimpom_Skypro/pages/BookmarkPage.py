@@ -31,24 +31,3 @@ class BookmarkPage:
             )
         )
         return counter.text.strip()
-
-    def clear_my_books(self) -> None:
-        """
-        Этот метод очищает закладки и проверет что раздел пуст.
-        """
-        # Закрытие popup если появился
-        self.popup.close_popup()
-
-        # Поиск и нажатие на кнопку очистки
-        self.driver.find_element(*self.BOOK_CLEAR).click()
-
-        # Подтверждение очистки
-        confirm = WebDriverWait(self.driver, 10).until(
-            EC.element_to_be_clickable(self.CONFIRM)
-            )
-        confirm.click()
-
-        # Проверка что список пуст
-        WebDriverWait(self.driver, 10).until(
-            EC.visibility_of_element_located(
-                self.EMPTY))
