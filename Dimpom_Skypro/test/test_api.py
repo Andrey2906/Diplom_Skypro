@@ -74,7 +74,7 @@ def test_post_bookmark(session):
 @pytest.mark.api
 @allure.title("Удаление книги из закладок по ID")
 @allure.story("Закладки")
-def test_delete_bookmark(session):
+def test_delete_bookmark(session, created_bookmark_id):
 
     books_api = BooksApi(session)
 
@@ -86,10 +86,10 @@ def test_delete_bookmark(session):
         book = books_api.books_canBuy(data)
 
     with allure.step("Получаем ID книги"):
-        book_id = book["attributes"]["id"]
+        _ = book["attributes"]["id"]
 
     with allure.step("Удаляем книгу по ID из рездела заметки"):
-        bookmark = books_api.delete_bookmark(book_id)
+        bookmark = books_api.delete_bookmark(created_bookmark_id)
         assert bookmark.status_code == 204
 
 
@@ -106,7 +106,7 @@ def test_delete_invalid_bookmark(session):
 
     with allure.step("Удаляем книгу по невалидному ID из рездела заметки"):
         bookmark = books_api.delete_bookmark(book_id)
-        assert bookmark.status_code == 204
+        assert bookmark.status_code == 404
 
     with allure.step("Логируем ответ консоли в отчёт"):
         allure.attach(
