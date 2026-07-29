@@ -7,8 +7,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from config.ui_config import BASE_URL, TOKEN1, TOKEN2
 from config.api_config import HEADERS
-from pages.CartPage import CartPage
-from pages.BookmarkPage import BookmarkPage
+from pages.SearchPage import SearchPage
 
 
 @pytest.fixture
@@ -63,21 +62,49 @@ def session():
 
 
 @pytest.fixture
+def search_page(driver):
+    """Фикстура инициализирует объект страницы поиска."""
+    return SearchPage(driver)
+
+
+@pytest.fixture
 def cleanup_profile(driver):
-    """Фикстура для полной очистки данных пользователя после теста."""
+    """Фикстура для полной очистки данных пользователя после теста.
+    Выполняет очистку напрямую через драйвер,
+    не используя удаленные методы классов.
+    """
     yield
-    # Блок после yield — ТЕАРДАУН (выполняется всегда, даже если тест упал!)
-    print("\n[Teardown] Запуск полной очистки профиля...")
-    # 1. Очищаем корзину
+    # Блок Теардауна (выполняется ПОСЛЕ теста)
+    print("\n[Teardown] Запуск прямой очистки профиля от сайд-эффектов...")
+    # 1. Прямая очистка Корзины через UI
     try:
-        cart_page = CartPage(driver)
-        cart_page.clear_cart()
+        driver.get("https://chitai-gorod.ru")
+        # Локатор кнопки очистки корзины на сайте
+        clear_cart_locator = (
+            By.CSS_SELECTOR, "button.cart-clean-button, .button-clear")
+        # Ожидаем кнопку и кликаем по ней напрямую через драйвер
+        button = WebDriverWait(driver, 5).until(
+            EC.element_to_be_clickable(clear_cart_locator)
+        )
+        button.click()
+        print("[Teardown] Корзина успешно очищена.")
     except Exception as e:
-        print(f"[Teardown Warning] Не удалось очистить корзину: {e}")
-    # 2. Очищаем список книг / закладки
+        print(f"[Teardown Info] Очистка корзины пропущена. Причина: {e}")
+
+    # 2. Прямая очистка Закладок через UI
     try:
-        # Передаем драйвер в класс, где объявлен clear_my_books
-        books_page = BookmarkPage(driver)
-        books_page.clear_my_books()
+        driver.get("https://chitai-gorod.ru")
+        # Локатор активных иконок удаления/сердечек в списке закладок
+        remove_bookmark_locator = (
+            By.CSS_SELECTOR, "button.bookmark-delete,"
+            " .product-card__bookmark--active")
+        # Ищем все элементы закладок и кликаем по ним напрямую через драйвер
+        buttons = WebDriverWait(driver, 5).until(
+            EC.presence_of_all_elements_located(remove_bookmark_locator)
+        )
+        for button in buttons:
+            if button.is_displayed():
+                button.click()
+        print("[Teardown] Все закладки успешно удалены.")
     except Exception as e:
-        print(f"[Teardown Warning] Не удалось очистить список книг: {e}")
+        print(f"[Teardown Info] Очистка закладок пропущена. Причина: {e}")
