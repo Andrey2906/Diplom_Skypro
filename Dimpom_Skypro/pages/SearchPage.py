@@ -1,7 +1,7 @@
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from pages.ui_helpers import UiHelpers
+from selenium.common.exceptions import TimeoutException
 
 
 class SearchPage:
@@ -16,9 +16,21 @@ class SearchPage:
     CART_COUNTER = (
         By.CSS_SELECTOR, 'div[data-testid-indicator-header="cartCounter"]')
 
-    def __init__(self, driver) -> None:
+    def __init__(self, driver):
         self.driver = driver
-        self.popup: UiHelpers = UiHelpers(self.driver)
+        # Локатор карточек товара в результатах поиска
+        self._product_cards = (By.CSS_SELECTOR, "article.product-card")
+
+    def get_search_results(self):
+        """Ожидает появление карточек книг на
+        странице поиска и возвращает их список."""
+        try:
+            return WebDriverWait(self.driver, 10).until(
+                EC.presence_of_all_elements_located(self._product_cards)
+            )
+        except TimeoutException:  # Исправлено
+            print("[SearchPage Error] Кнопки добавления "
+                  "в корзину не найдены на странице результатов")
 
     def choose_first_book(self) -> None:
         """
