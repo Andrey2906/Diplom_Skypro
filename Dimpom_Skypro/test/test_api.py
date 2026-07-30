@@ -72,20 +72,17 @@ def test_post_bookmark(session):
 
 # 4) Удаление книги из раздела закладки по ID
 @pytest.mark.api
-@allure.title("Удаление книги из закладок по ID")
 @allure.story("Закладки")
-@pytest.mark.api
-@allure.title("Удаление книги из закладок")
+@allure.title("Удаление книги из закладок по ID")
 def test_delete_bookmark(session, created_bookmark_id):
     books_api = BooksApi(session)
 
-    with allure.step("Отправляем запрос "
-                     "на удаление закладки с ID {created_bookmark_id}"):
-        # Фикстура сама создала закладку и передала нам её корректный ID
+    with allure.step(f"Отправляем запрос на удаление закладки с ID {
+                     created_bookmark_id}"):
         response = books_api.delete_bookmark(created_bookmark_id)
 
     with allure.step("Проверяем успешность удаления"):
-        assert response.status_code in [200, 204]
+        assert response.status_code == 204
 
 
 # 5) проверка удаления книги из раздела Закладки с невалидным ID
